@@ -93,3 +93,53 @@ Router = new urlRouter;
 Meteor.startup(function () {
     Backbone.history.start({pushState: true});
 });
+
+
+Template.login.events({
+    'click #submit' : function (evt) {
+        evt.preventDefault();
+        
+        var $username = $('#username').val();
+        var $password = $('#password').val();
+
+        if($password.length === 0 || $username.length === 0) {
+            Session.set('info', {success: '', error: "username or password can't be blank!"});
+            return;
+        }
+
+        Meteor.loginWithPassword($username, $password, function (err) {
+            if(err) {
+                Session.set('info', {success: '', error: err.reason});
+            } else {
+                Router.redirect('/');
+                Session.set('info', {success: 'login successfully!', error: ''});
+            }
+        });
+    }
+});
+
+
+Posts = new Meteor.Collection('posts');
+
+Template.index.events({
+    'click #submit': function (evt) {
+        evt.preventDefault();
+        var $post = $('#post').val();
+        if($post.length === 0 || $post.length >= 140) {
+            Session.set('info', {success: '', error: 'words between 1 and 140! '});
+            return;
+        }
+        Posts.insert({user: Meteor.user(), post: $post, time: Date.now()}, function (err) {
+            if(err) {
+                Session.set('info', {success: '', error: err.reason});
+            } else {
+                Session.set('info', {success: 'post successfully!', error: ''});
+                $('#post').val('');
+            }
+        });
+    }
+});
+
+Template.index.posts = function () {
+     return Posts.find({}, {sort: {time: -1}});
+};
