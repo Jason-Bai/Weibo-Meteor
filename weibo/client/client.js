@@ -122,19 +122,58 @@ Template.login.events({
 Posts = new Meteor.Collection('posts');
 
 Template.index.events({
-    'click #submit': function (evt) {
+    'click #psubmit': function (evt) {
         evt.preventDefault();
         var $post = $('#post').val();
         if($post.length === 0 || $post.length >= 140) {
             Session.set('info', {success: '', error: 'words between 1 and 140! '});
             return;
         }
-        Posts.insert({user: Meteor.user(), post: $post, time: Date.now()}, function (err) {
+        var date = new Date();
+        var time = {
+            year: date.getFullYear(),
+            month: date.getMonth() + 1,
+            day: date.getDate(),
+            format: date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds()
+        };
+        Posts.insert({user: Meteor.user(), post: $post, time: time}, function (err) {
             if(err) {
                 Session.set('info', {success: '', error: err.reason});
             } else {
                 Session.set('info', {success: 'post successfully!', error: ''});
                 $('#post').val('');
+            }
+        });
+    },
+    'click #rsubmit': function (evt) {
+        evt.preventDefault();
+        var $reply = $('#reply_' + this._id).val();
+        if($reply.length ===0 || $reply.length >= 140) {
+            Session.set('info', {success: '', error: 'words between 1 and 140!'});
+            return;
+        }
+        var date = new Date();
+        var time = {
+            year: date.getFullYear(),
+            month: date.getMonth(),
+            day: date.getDate(),
+            format: date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds()
+        };
+        Posts.update({
+            _id: this._id
+        }, {
+            $push : {
+                comments: {
+                    user: this.user,
+                    content : $reply,
+                    time: time
+                }
+            }
+        }, function (err) {
+            if(err) {
+                Session.set('info', {success: '', error: err.reason});
+            } else {
+                Session.set('info', {success: 'reply successfully!', error: ''});
             }
         });
     }

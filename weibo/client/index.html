@@ -2,12 +2,23 @@
     {{#if currentUser}}
         <form class="well form-inline center" style="text-align:center;">
             <input type="text" class="span8" id="post"/>
-            <button id="submit" class="btn btn-success"><i class="icon-comment icon-white"></i></button>
+            <button id="psubmit" class="btn btn-success"><i class="icon-comment icon-white"></i></button>
         </form>
     {{/if}}
     {{#each posts}}
         <h2>{{user.username}} said</h2>
-        <p class="muted">{{time}}</p>
+        <p class="muted">{{time.format}}</p>
         <p>{{#markdown}}{{post}}{{/markdown}}</p>
+        {{#if comments}}
+            <h6 style="border-top:1px solid #ccc;">Reply:</h6>
+            {{#each comments}}
+                <p>{{content}}</p>
+                <p class="right">by {{user.username}} at {{time.format}}</p>
+            {{/each}}
+        {{/if}}
+        <form class="form-inline left" style="text-align:left">
+                <input type="text" class="span4" id="reply_{{_id}}"/>
+                <button id="rsubmit" class="btn btn-success"><i class="icon-comment icon-white"></i></button>
+        </form>
     {{/each}}
 </template>
